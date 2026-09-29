@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "Image Credit",
+  "version": "1.0",
+  "description": "העתקת קרדיט לתמונה מקליק ימני",
+  "permissions": ["contextMenus", "activeTab", "scripting"],
+  "background": { "service_worker": "background.js" }
+}

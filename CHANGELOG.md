@@ -1,6 +1,23 @@
 # Changelog
 
-All notable changes to this project are recorded here. The format follows Keep a Changelog, and versions follow Semantic Versioning (MAJOR.MINOR.PATCH). The version number is also set in `manifest.json`, and each release has a matching git tag such as `v1.1.0`.
+All notable changes to this project are recorded here. The format follows Keep a Changelog, and versions follow Semantic Versioning (MAJOR.MINOR.PATCH). The version number is also set in `manifest.json`, and each release has a matching git tag such as `v1.2.0`.
+
+## [1.2.0] on 2026-09-29
+
+### Changed
+- The interface is now in English for an international audience. The right click menu item is "Copy image credit", the on page messages are in English, and the manifest description is in English. The credit line itself still follows the language of the page.
+- The README is now in English only. The previous Hebrew section remains available in the git history.
+- Code comments are now in English.
+
+### Added
+- `PRIVACY.md`, the privacy policy for the store listing.
+- `store/listing.md`, the text for the Chrome Web Store listing, the permission justifications and the review notes. It is not part of the extension package.
+
+## [1.1.1] on 2026-09-29
+
+### Added
+- Extension icons in three sizes (16, 48 and 128 pixels), declared in `manifest.json`. The 128 pixel icon is required by the Chrome Web Store.
+- `tools/make_icons.py`, a script that regenerates the icons using only the Python standard library. It is a development tool and is not part of the extension package.
 
 ## [1.1.0] on 2026-09-29
 
@@ -19,5 +36,5 @@ All notable changes to this project are recorded here. The format follows Keep a
 ## [1.0.0] on 2026-09-29
 
 ### Added
-- Initial release. Right click an image and choose "העתק קרדיט לתמונה" to copy a credit line with the site name, the main site URL, the page title and the date the credit was created.
+- Initial release. Right click an image and choose the menu item to copy a credit line with the site name, the main site URL, the page title and the date the credit was created.
 - README in Hebrew and English.

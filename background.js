@@ -1,7 +1,7 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "copyImageCredit",
-    title: "העתק קרדיט לתמונה",
+    title: "Copy image credit",
     contexts: ["image"]
   });
 });
@@ -16,11 +16,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       args: [info.srcUrl || ""]
     });
   } catch (e) {
-    console.error("יצירת הקרדיט נכשלה", e);
+    console.error("Image Credit: could not build the credit", e);
   }
 });
 
-// הפונקציה רצה בתוך הדף עצמו, ולכן חייבת להיות עצמאית לחלוטין
+// This function runs inside the page itself, so it must be fully self contained
 function buildAndCopyCredit(srcUrl) {
   const clean = (t) => (t || "").replace(/\s+/g, " ").trim();
   const normalize = (u) => {
@@ -31,7 +31,7 @@ function buildAndCopyCredit(srcUrl) {
     }
   };
 
-  // פרטי האתר
+  // Site details
   const meta = document.querySelector('meta[property="og:site_name"]');
   const siteName =
     (meta && meta.content && meta.content.trim()) ||
@@ -39,7 +39,7 @@ function buildAndCopyCredit(srcUrl) {
   const siteUrl = location.origin;
   const title = document.title.trim();
 
-  // שפת הדף: לפי האותיות בכותרת, ואם אין הכרעה אז לפי התכונה lang
+  // Page language: decided by the letters in the title, then by the lang attribute
   const hebrewLetters = (title.match(/[\u0590-\u05FF]/g) || []).length;
   const latinLetters = (title.match(/[A-Za-z]/g) || []).length;
   const htmlLang = (document.documentElement.lang || "").toLowerCase();
@@ -55,7 +55,7 @@ function buildAndCopyCredit(srcUrl) {
     ? now.toLocaleDateString("he")
     : now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
-  // איתור התמונה שעליה לחצו
+  // Find the image that was clicked
   const target = normalize(srcUrl);
   const matches = Array.from(document.images).filter((img) => {
     const singles = [
@@ -72,7 +72,7 @@ function buildAndCopyCredit(srcUrl) {
     });
   });
 
-  // חילוץ שם הצלם או היוצר
+  // Extract the photographer or creator
   const stripLabel = (t) =>
     t.replace(/^(?:צילום|קרדיט|photo(?:graph)?|image|credit)\s*[:：]\s*/i, "").trim();
 
@@ -95,8 +95,8 @@ function buildAndCopyCredit(srcUrl) {
   const CAPTION_SEL = 'figcaption, [class*="caption" i], [aria-label*="caption" i]';
 
   const creditFromImage = (img) => {
-    // אלמנטים מקיפים שמכילים את התמונה הזו בלבד, מהקרוב לרחוק (עד 5 רמות),
-    // כדי לא לשייך קרדיט של תמונה אחרת
+    // Surrounding containers that hold this one image only, nearest first (up to 5 levels),
+    // so that the credit of another image is never attached by mistake
     const scopes = [];
     let el = img.parentElement;
     for (let depth = 0; el && depth < 5; depth++, el = el.parentElement) {
@@ -105,7 +105,7 @@ function buildAndCopyCredit(srcUrl) {
       scopes.push(el);
     }
 
-    // אלמנט קרדיט ייעודי. מדלגים על עטיפות שמכילות אלמנט קרדיט אחר
+    // A dedicated credit element. Wrappers that contain another credit element are skipped
     for (const scope of scopes) {
       const els = Array.from(scope.querySelectorAll(CREDIT_SEL)).filter(
         (e) => !e.querySelector(CREDIT_SEL)
@@ -116,7 +116,7 @@ function buildAndCopyCredit(srcUrl) {
       }
     }
 
-    // כיתובים: figcaption יכול להיות בתוך figure, בתוך picture, או באלמנט עוטף אחר
+    // Captions: a figcaption can sit inside a figure, inside a picture, or in another wrapper
     const texts = [];
     const fig = img.closest("figure");
     for (const scope of [fig, ...scopes]) {
@@ -144,7 +144,7 @@ function buildAndCopyCredit(srcUrl) {
   const text = isHebrew
     ? `קרדיט תמונה: ${creditPart}${siteName} (${siteUrl}), "${title}" (תועד בתאריך ${date})`
     : `Image credit: ${creditPart}${siteName} (${siteUrl}), "${title}" (documented on ${date})`;
-  const doneMsg = credit ? "הקרדיט הועתק" : "הקרדיט הועתק (לא נמצא שם צלם או יוצר)";
+  const doneMsg = credit ? "Credit copied" : "Credit copied (no photographer or creator found)";
 
   const showToast = (msg) => {
     const el = document.createElement("div");
@@ -159,7 +159,7 @@ function buildAndCopyCredit(srcUrl) {
       borderRadius: "6px",
       zIndex: "2147483647",
       font: "14px sans-serif",
-      direction: "rtl"
+      direction: "ltr"
     });
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 2500);
@@ -174,7 +174,7 @@ function buildAndCopyCredit(srcUrl) {
     ta.select();
     const ok = document.execCommand("copy");
     ta.remove();
-    showToast(ok ? doneMsg : "ההעתקה נכשלה");
+    showToast(ok ? doneMsg : "Copy failed");
   };
 
   if (navigator.clipboard && navigator.clipboard.writeText) {

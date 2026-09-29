@@ -1,8 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Image Credit",
-  "version": "1.1.0",
-  "description": "העתקת קרדיט לתמונה מקליק ימני",
+  "version": "1.2.0",
+  "description": "Right click an image to copy a credit line with the photographer, site name, site URL, page title and date.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["contextMenus", "activeTab", "scripting"],
   "background": { "service_worker": "background.js" }
 }

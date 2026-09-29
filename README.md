@@ -1,19 +1,19 @@
-# Image Credit Extension
+# Image Credit
 
-A small Chrome extension (Manifest V3). Right click an image on any page, choose "העתק קרדיט לתמונה" (Copy image credit), and a credit line is copied to the clipboard.
+A small Chrome extension (Manifest V3). Right click an image on any page, choose "Copy image credit", and a credit line is copied to the clipboard.
 
 ## Output format
 
-The whole credit line is written in the language of the page. On a Hebrew page:
-
-```
-קרדיט תמונה: <photographer or creator>, <site name> (<site URL>), "<page title>" (תועד בתאריך <date>)
-```
-
-On an English page (and on pages in any other language):
+On an English page, and on pages in any language other than Hebrew:
 
 ```
 Image credit: <photographer or creator>, <site name> (<site URL>), "<page title>" (documented on <date>)
+```
+
+On a Hebrew page:
+
+```
+קרדיט תמונה: <photographer or creator>, <site name> (<site URL>), "<page title>" (תועד בתאריך <date>)
 ```
 
 Example:
@@ -28,15 +28,17 @@ If no photographer or creator is found, that part is left out:
 Image credit: <site name> (<site URL>), "<page title>" (documented on <date>)
 ```
 
-**Language detection:** the page title decides. If it has more Hebrew letters than Latin letters, the Hebrew format is used, and if it has more Latin letters, the English format is used. If the title does not decide (for example it has no letters), the `lang` attribute of the page is used. The date is written as `29.9.2026` in Hebrew and `29 September 2026` in English. The photographer name, site name and page title are copied as the page publishes them, and are not translated.
-
 - **Photographer or creator:** read from the credit that the page publishes for the clicked image (see below).
 - **Site name:** taken from the `og:site_name` meta tag if the page defines one, otherwise from the domain name.
 - **Site URL:** the main address of the site (`location.origin`), without the article path.
 - **Page title:** the browser tab title (`document.title`).
-- **Date:** the day the credit was created, in Hebrew locale format.
+- **Date:** the day the credit was created. It is written as `29 September 2026` in English and `29.9.2026` in Hebrew.
 
-Nothing is sent to any external service. All processing happens inside the page.
+The photographer name, site name and page title are copied as the page publishes them and are not translated. Nothing is sent to any external service. All processing happens inside the page.
+
+## Page language
+
+The page title decides the language of the credit line. If it has more Hebrew letters than Latin letters, the Hebrew format is used, and if it has more Latin letters, the English format is used. If the title does not decide (for example it has no letters), the `lang` attribute of the page is used. Pages in other languages get the English format.
 
 ## How the photographer or creator is found
 
@@ -59,7 +61,7 @@ Only containers that hold the clicked image alone are searched, so a credit that
 2. Open `chrome://extensions`.
 3. Turn on "Developer mode".
 4. Click "Load unpacked" and select the repository folder (the one containing `manifest.json`).
-5. Right click an image on any page and choose "העתק קרדיט לתמונה".
+5. Right click an image on any page and choose "Copy image credit".
 
 After changing the code, click the reload button on the extension card.
 
@@ -67,6 +69,12 @@ After changing the code, click the reload button on the extension card.
 
 - `manifest.json`: extension definition and permissions (`contextMenus`, `activeTab`, `scripting`).
 - `background.js`: creates the context menu item and runs the credit builder inside the active page.
+- `icons/`: the extension icons. `tools/make_icons.py` regenerates them using only the Python standard library.
+- `PRIVACY.md`: the privacy policy.
+- `store/listing.md`: text for the Chrome Web Store listing and the review form.
+- `CHANGELOG.md`: version history. Each release has a git tag such as `v1.2.0`.
+
+The extension package for the store contains only `manifest.json`, `background.js` and `icons/`.
 
 ## Known limitations
 
@@ -74,68 +82,8 @@ After changing the code, click the reload button on the extension card.
 - The menu item appears only when the right click lands on an `<img>` element. Some sites place a transparent layer over the image or use a CSS background image, and there the menu will not appear.
 - The extension cannot run on restricted pages such as `chrome://` pages and the Chrome Web Store.
 - Many sites include the site name at the end of the page title, so the name may appear twice in the credit.
-- The credit extraction was tested against mock page structures only, not against live sites. Clipboard behavior may differ between sites.
+- The credit extraction was tested against mock page structures and manually on one live news site, not against a wide range of sites. Clipboard behavior may differ between sites.
 
----
+## Debugging
 
-# תוסף קרדיט לתמונה
-
-תוסף כרום קטן (Manifest V3). קליק ימני על תמונה בכל דף, בחירה ב"העתק קרדיט לתמונה", והטקסט מועתק ללוח.
-
-## פורמט הקרדיט
-
-כל שורת הקרדיט נכתבת בשפת הדף. בדף בעברית:
-
-```
-קרדיט תמונה: <צלם או יוצר>, <שם האתר> (<כתובת האתר>), "<כותרת הדף>" (תועד בתאריך <תאריך>)
-```
-
-בדף באנגלית (ובדף בכל שפה אחרת):
-
-```
-Image credit: <photographer or creator>, <site name> (<site URL>), "<page title>" (documented on <date>)
-```
-
-אם לא נמצא צלם או יוצר, החלק הזה מושמט, והקרדיט מורכב משם האתר, כתובתו, כותרת הדף והתאריך.
-
-**זיהוי השפה:** כותרת הדף מכריעה. אם יש בה יותר אותיות עבריות מלטיניות, נבחר הפורמט בעברית, ואם יש יותר אותיות לטיניות, נבחר הפורמט באנגלית. אם הכותרת לא מכריעה (למשל אין בה אותיות), נעשה שימוש בתכונה `lang` של הדף. התאריך נכתב כ־`29.9.2026` בעברית וכ־`29 September 2026` באנגלית. שם הצלם, שם האתר וכותרת הדף מועתקים כפי שהדף מפרסם אותם ולא מתורגמים.
-
-- **צלם או יוצר:** נקרא מהקרדיט שהדף מפרסם עבור התמונה שעליה לחצת.
-- **שם האתר:** מתג `og:site_name` אם קיים בדף, ואחרת שם הדומיין.
-- **כתובת האתר:** הכתובת הראשית של האתר, ללא הנתיב של הכתבה.
-- **כותרת הדף:** כותרת הלשונית בדפדפן.
-- **תאריך:** מועד יצירת הקרדיט.
-
-לא נשלח מידע לשום שירות חיצוני.
-
-## איך נמצא שם הצלם או היוצר
-
-התוסף מאתר את התמונה בדף ומחפש קרדיט לפי הסדר הבא:
-
-1. אלמנט קרדיט ייעודי ליד התמונה: אלמנט ששם המחלקה שלו כולל `credit` או `photographer`, שה־`aria-label` שלו כולל `credit` (למשל `aria-label="Image credit"`), או אלמנט עם `itemprop="creator"`. האלמנט לא חייב להיות באותה עטיפה של התמונה. התוסף מחפש בקונטיינרים שמסביב, עד חמש רמות למעלה, כל עוד הם מכילים את התמונה הזו ואף תמונה אחרת.
-2. כיתוב התמונה (`<figcaption>`, בתוך `<figure>` או ישירות בתוך `<picture>`, או אלמנט ששם המחלקה או ה־`aria-label` שלו כוללים `caption`), ואחריו התכונות `title` ו־`alt` של התמונה.
-
-מתוך טקסט הכיתוב נלקח:
-
-- קרדיט עם תווית, כמו `Photo: Name`, `Photo by Name`, `Credit: Name` או `צילום: שם`.
-- קרדיט אחרי סימן זכויות יוצרים, כמו `© Name, AFP`.
-- אחרת, הסוגריים האחרונים בסוף הכיתוב, למשל `(Ronen Zvulun, Pool Photo via AP)`. זה הפורמט של The Times of Israel.
-
-מחפשים רק בקונטיינרים שמכילים את התמונה הזו בלבד, כדי שקרדיט של תמונה שכנה בגלריה לא יצורף בטעות. אם לא נמצא דבר, הקרדיט עדיין מועתק בלי שם, וההודעה על המסך מציינת זאת.
-
-## התקנה
-
-1. מורידים או משכפלים את הריפו.
-2. נכנסים ל־`chrome://extensions` ומפעילים "מצב מפתח".
-3. לוחצים "טען הרחבה שאינה ארוזה" ובוחרים את תיקיית הריפו (התיקייה שמכילה את `manifest.json`).
-4. קליק ימני על תמונה ובחירה ב"העתק קרדיט לתמונה".
-
-אחרי שינוי בקוד יש ללחוץ על כפתור הרענון בכרטיס ההרחבה.
-
-## מגבלות ידועות
-
-- אתרים מפרסמים קרדיטים בדרכים שונות. הזיהוי מבוסס היוריסטיקה ועלול לפספס קרדיט, או לקחת סוגריים בסוף כיתוב שאינם קרדיט. כדאי לבדוק את הטקסט המועתק לפני פרסום.
-- האפשרות מופיעה רק כשהקליק הימני נופל על אלמנט `<img>`. באתרים שבהם מונחת שכבה שקופה מעל התמונה או שהתמונה מוגדרת כרקע ב־CSS, התפריט לא יופיע.
-- התוסף לא פועל בדפים מוגבלים כמו `chrome://` וחנות ההרחבות.
-- באתרים רבים שם האתר מופיע כבר בסוף כותרת הדף, ולכן הוא עלול להופיע פעמיים בקרדיט.
-- חילוץ הקרדיט נבדק על מבני דפים מדומים בלבד ולא על אתרים חיים. התנהגות ההעתקה ללוח עשויה להשתנות בין אתרים.
+Each time the menu item is used, a line starting with `[ImageCredit]` is written to the console of the page. It shows the image address, how many matching images were found, the detected credit and the language that was chosen.
